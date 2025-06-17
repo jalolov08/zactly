@@ -1,12 +1,15 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import MainStack from '@/navigation/index';
+import { AuthProvider } from '@/contexts/AuthContext/auth.context';
 
 function App() {
   return (
-    <NavigationContainer>
-      <MainStack />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <MainStack />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 

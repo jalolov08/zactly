@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TabBarButton } from '@/components/TabBarButton/tabBarButton.component';
 import { colors } from '@/constants/colors.constant';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useState } from 'react';
 import { View, StyleSheet, LayoutChangeEvent, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useAuthStore } from '@/zustand/useAuthStore';
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState({ height: 0, width: 0 });
   const [buttonWidth, setButtonWidth] = useState(0);
-
+  const { authenticated } = useAuthStore();
   const onTabBarLayout = (e: LayoutChangeEvent) => {
     const width = e.nativeEvent.layout.width;
     setDimensions({
@@ -21,6 +22,14 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   };
 
   const tabPositionX = useSharedValue(0);
+
+  useEffect(() => {
+    if (buttonWidth > 0) {
+      tabPositionX.value = withSpring(buttonWidth * state.index, {
+        duration: 1500,
+      });
+    }
+  }, [state.index, buttonWidth, tabPositionX]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -40,6 +49,10 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         return 'home';
     }
   };
+
+  if (state.routes[state.index].name === 'профиль' && !authenticated) {
+    return null;
+  }
 
   return (
     <View style={styles.tabBar} onLayout={onTabBarLayout}>
