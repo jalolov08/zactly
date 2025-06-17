@@ -1,7 +1,8 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { api } from '@/api/api';
 import { useAuthStore } from '@/zustand/useAuthStore';
 import { User } from '@/types/user.type';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthContextProps {
   onLogin: (email: string, password: string) => Promise<any>;
@@ -33,13 +34,31 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const {
+    user: userStore,
     setUser,
     setToken,
     setRefreshToken,
     setAuthenticated,
     clear,
-    user: userStore,
   } = useAuthStore();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+
+        try {
+          const response = await api.get<{ user: User }>('/users/me');
+          setUser(response.data.user);
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      }
+    };
+    getUser();
+  }, [setUser]);
 
   const onLogin = async (email: string, password: string) => {
     try {
@@ -57,6 +76,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setToken(accessToken);
       setRefreshToken(refreshToken);
       setAuthenticated(true);
+      await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
 
       return response.data;
     } catch (error) {
@@ -79,6 +100,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setToken(accessToken);
       setRefreshToken(refreshToken);
       setAuthenticated(true);
+      await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
 
       return response.data;
     } catch (error) {
@@ -101,6 +124,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setToken(accessToken);
       setRefreshToken(refreshToken);
       setAuthenticated(true);
+      await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
 
       return response.data;
     } catch (error) {
@@ -141,6 +166,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setToken(accessToken);
       setRefreshToken(refreshToken);
       setAuthenticated(true);
+      await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
 
       return response.data;
     } catch (error) {
@@ -179,6 +206,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setToken(accessToken);
       setRefreshToken(refreshToken);
       setAuthenticated(true);
+      await AsyncStorage.setItem('token', accessToken);
+      await AsyncStorage.setItem('refreshToken', refreshToken);
 
       return response.data;
     } catch (error) {
@@ -205,6 +234,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       });
 
       clear();
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('refreshToken');
 
       return response.data;
     } catch (error) {
