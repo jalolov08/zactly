@@ -39,6 +39,9 @@ target 'Zactly' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Add Google Sign-In pod
+  pod 'GoogleSignIn'
+
   target 'ZactlyTests' do
     inherit! :complete
     # Pods for testing

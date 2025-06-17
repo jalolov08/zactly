@@ -14,6 +14,7 @@ import { SocialButtons } from '@/components/SocialButtons/social-buttons.compone
 import { BackButton } from '@/components/BackButton/back-button.component';
 import { useAuth } from '@/contexts/AuthContext/auth.context';
 import { LoginScreenProps } from '@/types/auth.type';
+import { signInWithGoogle } from '@/services/google.service';
 import styles from './login.style';
 
 function Login({ navigation }: LoginScreenProps) {
@@ -39,6 +40,27 @@ function Login({ navigation }: LoginScreenProps) {
       }
     } catch (err) {
       setError('Произошла ошибка. Пожалуйста, попробуйте снова.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const idToken = await signInWithGoogle();
+
+      if (!idToken) {
+        throw new Error('Google Sign In failed');
+      }
+      const result = await onGoogleSign(idToken);
+      if (result.error) {
+        setError(result.message);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Произошла ошибка при входе через Google');
     } finally {
       setLoading(false);
     }
@@ -126,7 +148,7 @@ function Login({ navigation }: LoginScreenProps) {
             </View>
 
             <SocialButtons
-              onGooglePress={() => onGoogleSign('')}
+              onGooglePress={handleGoogleSignIn}
               onApplePress={() => onAppleSign('')}
             />
           </View>
