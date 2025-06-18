@@ -9,6 +9,10 @@ export type AuthStackParams = {
   };
   SignUp: undefined;
   Profile: undefined;
+  EditProfile: undefined;
+  Interests: undefined;
+  Notifications: undefined;
+  PersonalizedAds: undefined;
 };
 
 export type AuthRouteProps<RouteName extends keyof AuthStackParams> = RouteProp<
@@ -24,3 +28,5 @@ export type LoginScreenProps = NativeStackScreenProps<AuthStackParams, 'Login'>;
 export type VerifyScreenProps = NativeStackScreenProps<AuthStackParams, 'Verify'>;
 
 export type SignUpScreenProps = NativeStackScreenProps<AuthStackParams, 'SignUp'>;
+
+export type ProfileScreenProps = NativeStackScreenProps<AuthStackParams, 'Profile'>;
