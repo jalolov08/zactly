@@ -10,6 +10,8 @@ import { api } from '@/api/api';
 import { config } from '../../../config';
 import { User } from '@/types/user.type';
 import { Category } from '@/types/category.type';
+import LottieView from 'lottie-react-native';
+import loadingAnimation from '@/assets/animations/loading-2.json';
 
 function Interests({ navigation }: InterestsScreenProps) {
   const { user, setUser } = useAuthStore();
@@ -96,9 +98,7 @@ function Interests({ navigation }: InterestsScreenProps) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Typography variant="regularText" style={styles.loadingText}>
-            Загрузка категорий...
-          </Typography>
+          <LottieView source={loadingAnimation} autoPlay loop style={styles.animation} />
         </View>
       </SafeAreaView>
     );

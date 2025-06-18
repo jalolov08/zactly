@@ -136,4 +136,8 @@ export default StyleSheet.create({
   saveButton: {
     marginBottom: 20,
   },
+  animation: {
+    width: 300,
+    height: 300,
+  },
 });
