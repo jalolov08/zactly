@@ -3,8 +3,7 @@ import { config } from '../../config';
 
 export const configureGoogleSignIn = () => {
   GoogleSignin.configure({
-    webClientId: config.google.client_id,
-    offlineAccess: true,
+    iosClientId: config.google.client_id,
   });
 };
 

@@ -1,4 +1,4 @@
-package com.zactly
+package com.phaelor.zactly
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -42,4 +42,4 @@ class MainApplication : Application(), ReactApplication {
     }
     ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
   }
-}
+} 
