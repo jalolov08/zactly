@@ -3,6 +3,7 @@ import { api } from '@/api/api';
 import { useAuthStore } from '@/zustand/useAuthStore';
 import { User } from '@/types/user.type';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDeviceAndLocationData } from '@/utils/device.util';
 
 interface AuthContextProps {
   onLogin: (email: string, password: string) => Promise<any>;
@@ -62,11 +63,15 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const onLogin = async (email: string, password: string) => {
     try {
+      const { device, locationData } = await getDeviceAndLocationData();
+
       const response = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
         '/auth/login',
         {
           email,
           password,
+          device,
+          locationData,
         }
       );
 
@@ -87,10 +92,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const onGoogleSign = async (idToken: string) => {
     try {
+      const { device, locationData } = await getDeviceAndLocationData();
+
       const response = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
         '/auth/google',
         {
           idToken,
+          device,
+          locationData,
         }
       );
 
@@ -111,10 +120,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const onAppleSign = async (idToken: string) => {
     try {
+      const { device, locationData } = await getDeviceAndLocationData();
+
       const response = await api.post<{ user: User; accessToken: string; refreshToken: string }>(
         '/auth/apple',
         {
           idToken,
+          device,
+          locationData,
         }
       );
 
@@ -150,6 +163,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const onVerify = async (email: string, code: string) => {
     try {
+      const { device, locationData } = await getDeviceAndLocationData();
+
       const response = await api.post<{
         message: string;
         user: User;
@@ -158,6 +173,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       }>('/auth/verify-otp', {
         email,
         code,
+        device,
+        locationData,
       });
 
       const { user, accessToken, refreshToken } = response.data;
@@ -189,6 +206,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const onResetPassword = async (email: string, code: string, newPassword: string) => {
     try {
+      const { device, locationData } = await getDeviceAndLocationData();
+
       const response = await api.post<{
         message: string;
         user: User;
@@ -198,6 +217,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         email,
         code,
         newPassword,
+        device,
+        locationData,
       });
 
       const { user, accessToken, refreshToken } = response.data;

@@ -50,7 +50,7 @@ function Categories() {
   };
 
   const handleCategoryPress = (category: Category) => {
-    console.log(category);
+    console.log(category)тзь ;
   };
 
   if (loading) {

@@ -45,7 +45,7 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Приложению требуется доступ к местоположению для улучшения пользовательского опыта и персонализации контента</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
