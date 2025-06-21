@@ -12,6 +12,8 @@ import { User } from '@/types/user.type';
 import { Category } from '@/types/category.type';
 import LottieView from 'lottie-react-native';
 import loadingAnimation from '@/assets/animations/loading-2.json';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { NoInternet } from '@/components/NoInternet/NoInternet.component';
 
 function Interests({ navigation }: InterestsScreenProps) {
   const { user, setUser } = useAuthStore();
@@ -20,12 +22,17 @@ function Interests({ navigation }: InterestsScreenProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [initialLoading, setInitialLoading] = useState(true);
+  const [shouldRetry, setShouldRetry] = useState(false);
+  const { isConnected, isDisconnected, checkNetworkStatus } = useNetworkStatus();
 
   const MAX_INTERESTS = 5;
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (isConnected && (shouldRetry || categories.length === 0)) {
+      fetchCategories();
+      setShouldRetry(false);
+    }
+  }, [isConnected, shouldRetry]);
 
   useEffect(() => {
     if (user?.interests) {
@@ -35,6 +42,7 @@ function Interests({ navigation }: InterestsScreenProps) {
 
   const fetchCategories = async () => {
     try {
+      setError('');
       const response = await api.get('/categories/active');
       setCategories(response.data || []);
     } catch (err: any) {
@@ -93,6 +101,20 @@ function Interests({ navigation }: InterestsScreenProps) {
       setLoading(false);
     }
   };
+
+  const handleRetry = () => {
+    setInitialLoading(true);
+    setShouldRetry(true);
+    checkNetworkStatus();
+  };
+
+  if (isDisconnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternet onRetry={handleRetry} />
+      </SafeAreaView>
+    );
+  }
 
   if (initialLoading) {
     return (

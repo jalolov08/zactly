@@ -8,6 +8,10 @@ export type MainStackParams = {
   Interests: undefined;
   Notifications: undefined;
   PersonalizedAds: undefined;
+  CategoryFacts: {
+    categoryId: string;
+    categoryName: string;
+  };
 };
 
 export type MainStackNavigationProps<NavigationName extends keyof MainStackParams> =
@@ -20,3 +24,5 @@ export type InterestsScreenProps = NativeStackScreenProps<MainStackParams, 'Inte
 export type NotificationsScreenProps = NativeStackScreenProps<MainStackParams, 'Notifications'>;
 
 export type PersonalizedAdsScreenProps = NativeStackScreenProps<MainStackParams, 'PersonalizedAds'>;
+
+export type CategoryFactsScreenProps = NativeStackScreenProps<MainStackParams, 'CategoryFacts'>;

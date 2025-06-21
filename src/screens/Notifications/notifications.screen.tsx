@@ -8,12 +8,16 @@ import styles from './notifications.style';
 import { NotificationsScreenProps } from '@/types/main.type';
 import { api } from '@/api/api';
 import { User } from '@/types/user.type';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { NoInternet } from '@/components/NoInternet/NoInternet.component';
 
 function Notifications({ navigation }: NotificationsScreenProps) {
   const { user, setUser } = useAuthStore();
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [shouldRetry, setShouldRetry] = useState(false);
+  const { isConnected, isDisconnected, checkNetworkStatus } = useNetworkStatus();
 
   useEffect(() => {
     if (user?.notificationsEnabled !== undefined) {
@@ -22,6 +26,11 @@ function Notifications({ navigation }: NotificationsScreenProps) {
   }, [user?.notificationsEnabled]);
 
   const handleToggleNotifications = async (value: boolean) => {
+    if (!isConnected) {
+      Alert.alert('Нет интернета', 'Проверьте подключение к интернету и повторите попытку');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -33,21 +42,36 @@ function Notifications({ navigation }: NotificationsScreenProps) {
       setUser(response.data.user);
       setNotificationsEnabled(value);
 
-      Alert.alert(
-        value ? 'Уведомления включены' : 'Уведомления отключены',
-        value
-          ? 'Теперь вы будете получать уведомления о новых фактах и обновлениях.'
-          : 'Уведомления отключены. Вы можете включить их в любое время.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Настройки обновлены', `Уведомления ${value ? 'включены' : 'отключены'}`, [
+        { text: 'OK' },
+      ]);
     } catch (err: any) {
-      setError(err.message || 'Произошла ошибка при изменении настроек уведомлений');
-      // Revert the toggle if there was an error
+      setError(err.message || 'Произошла ошибка при обновлении настроек');
       setNotificationsEnabled(!value);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleRetry = () => {
+    setError('');
+    setShouldRetry(true);
+    checkNetworkStatus();
+  };
+
+  useEffect(() => {
+    if (isConnected && shouldRetry) {
+      setShouldRetry(false);
+    }
+  }, [isConnected, shouldRetry]);
+
+  if (isDisconnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternet onRetry={handleRetry} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

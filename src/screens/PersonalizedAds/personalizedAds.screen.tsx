@@ -8,12 +8,16 @@ import styles from './personalizedAds.style';
 import { PersonalizedAdsScreenProps } from '@/types/main.type';
 import { api } from '@/api/api';
 import { User } from '@/types/user.type';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { NoInternet } from '@/components/NoInternet/NoInternet.component';
 
 function PersonalizedAds({ navigation }: PersonalizedAdsScreenProps) {
   const { user, setUser } = useAuthStore();
   const [personalizedAdsEnabled, setPersonalizedAdsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [shouldRetry, setShouldRetry] = useState(false);
+  const { isConnected, isDisconnected, checkNetworkStatus } = useNetworkStatus();
 
   useEffect(() => {
     if (user?.allowPersonalizedAds !== undefined) {
@@ -22,6 +26,11 @@ function PersonalizedAds({ navigation }: PersonalizedAdsScreenProps) {
   }, [user?.allowPersonalizedAds]);
 
   const handleTogglePersonalizedAds = async (value: boolean) => {
+    if (!isConnected) {
+      Alert.alert('Нет интернета', 'Проверьте подключение к интернету и повторите попытку');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -34,19 +43,37 @@ function PersonalizedAds({ navigation }: PersonalizedAdsScreenProps) {
       setPersonalizedAdsEnabled(value);
 
       Alert.alert(
-        value ? 'Персонализированная реклама включена' : 'Персонализированная реклама отключена',
-        value
-          ? 'Теперь вы будете видеть рекламу, которая соответствует вашим интересам.'
-          : 'Персонализированная реклама отключена. Вы будете видеть общую рекламу.',
+        'Настройки обновлены',
+        `Персонализированная реклама ${value ? 'включена' : 'отключена'}`,
         [{ text: 'OK' }]
       );
     } catch (err: any) {
-      setError(err.message || 'Произошла ошибка при изменении настроек рекламы');
+      setError(err.message || 'Произошла ошибка при обновлении настроек');
       setPersonalizedAdsEnabled(!value);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleRetry = () => {
+    setError('');
+    setShouldRetry(true);
+    checkNetworkStatus();
+  };
+
+  useEffect(() => {
+    if (isConnected && shouldRetry) {
+      setShouldRetry(false);
+    }
+  }, [isConnected, shouldRetry]);
+
+  if (isDisconnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternet onRetry={handleRetry} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

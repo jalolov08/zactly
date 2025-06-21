@@ -8,17 +8,29 @@ import { Category } from '@/types/category.type';
 import styles from './categories.style';
 import LottieView from 'lottie-react-native';
 import loadingAnimation from '@/assets/animations/loading-2.json';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { NoInternet } from '@/components/NoInternet/NoInternet.component';
+import { useNavigation } from '@react-navigation/native';
+import { MainStackNavigationProps } from '@/types/main.type';
+
+type NavigationProp = MainStackNavigationProps<'CategoryFacts'>['navigation'];
 
 function Categories() {
+  const navigation = useNavigation<NavigationProp>();
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [shouldRetry, setShouldRetry] = useState(false);
+  const { isConnected, isDisconnected, checkNetworkStatus } = useNetworkStatus();
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (isConnected && (shouldRetry || categories.length === 0)) {
+      fetchCategories();
+      setShouldRetry(false);
+    }
+  }, [isConnected, shouldRetry]);
 
   useEffect(() => {
     filterCategories();
@@ -27,6 +39,7 @@ function Categories() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
+      setError('');
       const response = await api.get('/categories/active');
       setCategories(response.data || []);
     } catch (err: any) {
@@ -50,8 +63,24 @@ function Categories() {
   };
 
   const handleCategoryPress = (category: Category) => {
-    console.log(category)тзь ;
+    navigation.navigate('CategoryFacts', {
+      categoryId: category._id,
+      categoryName: category.name,
+    });
   };
+
+  const handleRetry = () => {
+    setShouldRetry(true);
+    checkNetworkStatus();
+  };
+
+  if (isDisconnected) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <NoInternet onRetry={handleRetry} />
+      </SafeAreaView>
+    );
+  }
 
   if (loading) {
     return (
